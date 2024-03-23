@@ -3,23 +3,12 @@
     "description": "Shortcuts for writing latex in browser",
     "version": "1.0",
     "manifest_version": 3,
-    "permissions": [
-       "activeTab",
-       "scripting",
-       "commands"
-    ],
-    "background": {
-       "service_worker": "background.js"
-    },
-    "action": {
-      "default_title": "Convert shortcuts to latex"
-    },
-    "commands": {
-      "_execute_action": {
-        "suggested_key": {
-          "default": "Ctrl+Space",
-          "mac": "Ctrl+Space"
-        }
+    "content_scripts": [
+      {
+        "js": ["content.js"],
+        "matches": [
+          "https://www.notion.so/*"
+        ]
       }
-    }
+    ]
  }
