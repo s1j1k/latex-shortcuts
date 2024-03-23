@@ -20,7 +20,6 @@ function onKeyUp(event: KeyboardEvent): void {
 
   // only act on space
   const keyName = event.key;
-  console.log("keyName", keyName);
 
   if (keyName != " ") {
     return;
@@ -104,7 +103,7 @@ function onKeyUp(event: KeyboardEvent): void {
 
 // shortcuts
 const shortcuts = {
-  "\beg": () => {
+  "\\beg": () => {
     // return the shortcut
     // TODO capture some of what the user is typing until they hit enter or tab or something
     // NOTE removed the \beg in \begin
