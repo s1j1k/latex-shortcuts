@@ -16,7 +16,11 @@ function onKeyUp(event: KeyboardEvent): void {
         return;
     }
 
+    // only act on space
     const keyName = event.key;
+    if (keyName != " ") {
+        return;
+    }
 
     // get the text in that element
     const text = el?.textContent;
@@ -30,7 +34,8 @@ function onKeyUp(event: KeyboardEvent): void {
         const idx = text?.lastIndexOf(key);
         
         // make sure it is the very last thing in the element
-        if (key === text?.slice(idx)) {
+        if (key === text?.slice(idx).replace(" ","")) {
+            console.log("inserting text", value())
             el.insertAdjacentText("beforeend", value());
         } 
 
