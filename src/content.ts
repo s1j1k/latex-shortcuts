@@ -31,23 +31,21 @@ function onKeyUp(event: KeyboardEvent): void {
       node = window.getSelection()?.anchorNode?.previousSibling;
       idx = node?.textContent?.lastIndexOf(key) ?? -1;
       if (idx === -1) {
-      console.log("Shortcut ", key, " not detected.");
+        console.log("Shortcut ", key, " not detected.");
       }
     }
     // TODO make sure it is the very last thing in the element
     if (idx !== -1)
       // FIXME delete
       console.log("Shortcut ", key, " detected in buffer!");
-      try {
-        // @ts-ignore
-        value(node)
-        //window.getSelection().anchorNode.textContent = text.replace(key, value());
-        } catch {}
-    }
+    try {
+      // @ts-ignore
+      value(node);
+      //window.getSelection().anchorNode.textContent = text.replace(key, value());
+    } catch {}
   }
 }
 
 // TODO test more scenarios in Notion
 
 // TODO make it easy to turn the extension on/off for different sites
-
