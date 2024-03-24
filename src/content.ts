@@ -20,36 +20,34 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
+  let node = window.getSelection()?.anchorNode;
   for (const [key, value] of Object.entries(shortcuts)) {
-    const idx = text.lastIndexOf(key);
+    let idx = text.lastIndexOf(key);
+
+    //const node = window.getSelection()?.anchorNode;
 
     if (idx === -1) {
-      // FIXME delete
+      // try the previous sibling
+      node = window.getSelection()?.anchorNode?.previousSibling;
+      idx = node?.textContent?.lastIndexOf(key) ?? -1;
+      if (idx === -1) {
       console.log("Shortcut ", key, " not detected.");
+      }
     }
-    //document.body.insertAdjacentText("beforeend", "Howdy partner");
-
-    // make sure it is the very last thing in the element
-    // FIXME delete
-    console.log("Text buffer: ", text.slice(idx).replace(" ", ""));
-    if (idx !== -1 && key === text?.slice(idx).replace(" ", "")) {
+    // TODO make sure it is the very last thing in the element
+    if (idx !== -1)
       // FIXME delete
       console.log("Shortcut ", key, " detected in buffer!");
-      // FIXME delete
-      console.log("inserting text", value());
-      // TODO replace with the shortcut value
-      //typeValue(activeElement, value());
-      // TODO replace the shortcute key with the value
-      // node.textContent =
-      //   node.textContent?.replace(`/${key} */`, value()) ?? node.textContent;
-      // replace the shortcut
       try {
         // @ts-ignore
-          window.getSelection().anchorNode.textContent = text.replace(key, value());
+        value(node)
+        //window.getSelection().anchorNode.textContent = text.replace(key, value());
         } catch {}
     }
   }
 }
+
+// TODO test more scenarios in Notion
 
 // TODO make it easy to turn the extension on/off for different sites
 
