@@ -1,4 +1,6 @@
 import { shortcuts } from "./shortcuts";
+import insertTextAtCursor from 'insert-text-at-cursor';
+
 
 // check for shortcut pattern after any key is released
 document.addEventListener("keyup", (event) => {
@@ -10,9 +12,9 @@ document.addEventListener("keyup", (event) => {
 function onKeyUp(event: KeyboardEvent): void {
   // get the text which is just updated
   // FIXME activeElement is readonly -> Need to edit document different way
-  //const el = document.activeElement;
+  const activeElement = document.activeElement;
 
-  const el = document.body;
+  //const el = document.body;
 
   // if (!el) {
   //     return;
@@ -25,11 +27,11 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
-  // FIXME delete, for debugging only 
+  // FIXME delete, for debugging only
   console.log("Detected a space");
 
   // get the text in that element
-  if (!el) {
+  if (!activeElement) {
     // FIXME delete
     console.log("Element is undefined, returning");
     return;
@@ -37,7 +39,7 @@ function onKeyUp(event: KeyboardEvent): void {
 
   // just look at the last few chars
   const BUFFER = 50;
-  const text = el.textContent;
+  const text = activeElement.textContent;
 
   if (!text) {
     // FIXME delete
@@ -67,17 +69,35 @@ function onKeyUp(event: KeyboardEvent): void {
       console.log("Shortcut ", key, " not detected in buffer.");
     }
 
+    // FIXME delete
+    console.log("Testing adding text to the body anyway");
+    typeValue(activeElement, "VALUE")
+    insertTextAtCursor(textField, 'Coding Beauty');
+
+    //document.body.insertAdjacentText("beforeend", "Howdy partner");
+
     // make sure it is the very last thing in the element
+    // FIXME delete
+    console.log("Text buffer: ", textBuffer?.slice(idx).replace(" ", ""));
     if (idx !== -1 && key === textBuffer?.slice(idx).replace(" ", "")) {
       // FIXME delete
       console.log("Shortcut ", key, " detected in buffer!");
       // FIXME delete
       console.log("inserting text", value());
       // TODO replace with the shortcut value
-      el.insertAdjacentText("beforeend", value());
-      // el.innerHTML = el.innerHTML + 'TEST'
-      //   }
+      typeValue(activeElement, value());
     }
   }
 }
 // TODO make it easy to turn the extension on/off for different sites
+
+function typeValue(el: Element, value: string) {
+  for (let i = 0; i < value.length; i++) {
+    simulateKeyPress(el, value[i]);
+  }
+}
+
+function simulateKeyPress(el: Element, key: string) {
+  const event = new KeyboardEvent("keydown", { key });
+  document.dispatchEvent(event);
+}
