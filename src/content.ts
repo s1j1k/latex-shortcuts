@@ -1,18 +1,18 @@
+import { shortcuts } from "./shortcuts";
+
+// check for shortcut pattern after any key is released
 document.addEventListener("keyup", (event) => {
   return onKeyUp(event);
 });
-
-// TODO detect certain patterns
-// save the last 4-5 characters and detect if they match any of the pattersn in the shortcuts
-
-// let keyBuffer = "";
-// const BUFFER_SIZE = 30; // Read 30 chars
 
 // FIXME should we do with by checking inner HTML itself(?)
 
 function onKeyUp(event: KeyboardEvent): void {
   // get the text which is just updated
-  const el = document.activeElement;
+  // FIXME activeElement is readonly -> Need to edit document different way
+  //const el = document.activeElement;
+
+  const el = document.body;
 
   // if (!el) {
   //     return;
@@ -25,10 +25,12 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
+  // FIXME delete, for debugging only 
   console.log("Detected a space");
 
   // get the text in that element
   if (!el) {
+    // FIXME delete
     console.log("Element is undefined, returning");
     return;
   }
@@ -38,6 +40,7 @@ function onKeyUp(event: KeyboardEvent): void {
   const text = el.textContent;
 
   if (!text) {
+    // FIXME delete
     console.log("No text in active element, returning");
     return;
   }
@@ -46,9 +49,11 @@ function onKeyUp(event: KeyboardEvent): void {
   const textBuffer =
     text.length > BUFFER ? text.slice(text.length - BUFFER) : text;
 
+  // FIXME delete
   console.log("text buffer: ", textBuffer);
 
   // TODO make sure the last key entered is the last letter of the shortcut
+  // FIXME delete
   console.log("Searching for shortcuts");
   for (const [key, value] of Object.entries(shortcuts)) {
     //console.log(`${key}: ${value}`);
@@ -58,56 +63,21 @@ function onKeyUp(event: KeyboardEvent): void {
     const idx = textBuffer?.lastIndexOf(key);
 
     if (idx === -1) {
+      // FIXME delete
       console.log("Shortcut ", key, " not detected in buffer.");
     }
 
     // make sure it is the very last thing in the element
     if (idx !== -1 && key === textBuffer?.slice(idx).replace(" ", "")) {
+      // FIXME delete
       console.log("Shortcut ", key, " detected in buffer!");
+      // FIXME delete
       console.log("inserting text", value());
       // TODO replace with the shortcut value
       el.insertAdjacentText("beforeend", value());
+      // el.innerHTML = el.innerHTML + 'TEST'
+      //   }
     }
   }
-
-  // get the most recent element which needs shortcutting
-
-  // console.log("Active element tag name: ",el?.tagName)
-
-  // insertAdjacentText("beforeend", textInput.value);
-
-  // the whole notion page is being returned
-  //console.log("Text in active element=", text)
-
-  // make sure the active element is being updated
-
-  // console.log(keyName);
-
-  // // ignore special keys and only append single chars
-  // if (keyName.length == 1) {
-  //     keyBuffer += keyName;
-  // }
-
-  // if (keyName === " " || keyBuffer.length > BUFFER_SIZE ) {
-  //     // clear the buffer after a space or too long an entry
-  //     keyBuffer = ""
-  // }
-
-  // // check for shortcuts
-  // if (keyBuffer in shortcuts) {
-  //     // append the replacement code
-  //     // TODO include code for changing cursor position
-
-  // }
 }
-
-// shortcuts
-const shortcuts = {
-  "\\beg": () => {
-    // return the shortcut
-    // TODO capture some of what the user is typing until they hit enter or tab or something
-    // NOTE removed the \beg in \begin
-    // TODO add the environment name
-    return "in{} end{}";
-  },
-};
+// TODO make it easy to turn the extension on/off for different sites
