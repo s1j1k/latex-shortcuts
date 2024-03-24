@@ -15,6 +15,7 @@ export const shortcuts = {
     // TODO move the selection to right where the shortcut starts
     // move right a few characters
     // FIXME need to check thw whole anchorNode text conent
+    window.getSelection()?.selectAllChildren(node);
     for (let i = 0; i < "\\begin{".length; i++) {
       window.getSelection()?.modify("move", "right", "character");
     }
