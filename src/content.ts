@@ -47,6 +47,7 @@ function onKeyUp(event: KeyboardEvent): void {
   // look for shortcut \beg
   const shortcut = "\\beg";
   if (
+    event.key == "g" &&
     node.textContent?.substring(offset - shortcut.length, offset) === shortcut
   ) {
     insertString(node, offset, "in{} \\end{}");
