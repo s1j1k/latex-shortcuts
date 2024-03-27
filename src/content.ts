@@ -26,7 +26,7 @@ function onKeyUp(event: KeyboardEvent): void {
   }
 
   const offset = selection.focusOffset;
-  const node = selection.focusNode;
+  let node = selection.focusNode;
 
   if (node === undefined || node === null || (!offset && offset !== 0)) {
     return;
@@ -61,21 +61,30 @@ function onKeyUp(event: KeyboardEvent): void {
     // TODO check that the next character after the caret is } ??
   ) {
     // find the begin just before the caret position
+
+    // handling for inside block equations 
+    if (node.parentElement?.className.includes("token")) {
+      node = node.parentNode?.parentNode!;
+      if (!node ) {
+        return;
+      }
+    }
+
     const idx = node.textContent?.lastIndexOf("\\begin", offset);
-    const text = node.textContent?.slice(idx);
+    const text = node.textContent?.slice(idx)!;
 
     // if \end{} is empty just fill it with \begin{*}
     const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
     if (text.match(re1)) {
       // use first group match to fill out the end tag
       const newText = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
-      node.textContent = node.textContent.substring(0, idx) + newText;
+      node.textContent = node.textContent!.substring(0, idx) + newText;
     } else {
       // use regex to replace the \end{*} with envName from \begin{*}
       const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
       // replace 3rd group with first group
       const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
-      node.textContent = node.textContent.substring(0, idx) + newText;
+      node.textContent = node.textContent!.substring(0, idx) + newText;
       // TODO check what happens when there's multiple (?)
     }
     // move the caret back
