@@ -7,10 +7,14 @@ export const shortcuts = {
     // FIXME make it more careful to have the text in the right position
     //console.log("text content", selection.anchorNode.textContent)
     // @ts-ignore
-    node.textContent = node.textContent.replace(
+    if (node.textContent.indexOf("\\begin") !== -1) {
+      return;
+    }
+
+    node.textContent = node.textContent?.replace(
       "\\beg",
       "\\begin{} \\end{}"
-    );
+    ) ?? node.textContent;
 
     // TODO move the selection to right where the shortcut starts
     // move right a few characters
@@ -23,8 +27,12 @@ export const shortcuts = {
     //return "\\begin{} \\end{}";
   },
   "{": (node: Node) => {
+    if (node.textContent?.indexOf("}") !== -1) {
+      console.log("Found a closing bracket, leaving!")
+      return;
+    }
     // add a closing bracket
-    node.textContent = node.textContent + "}";
+    node.textContent = node.textContent.replace("}","{}")
     // move the cursor back one (needed ?)
     window.getSelection()?.modify("move", "right", "character");
     // TOOO modularize the movement of the cursor
