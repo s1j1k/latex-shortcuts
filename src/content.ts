@@ -10,7 +10,7 @@ document.addEventListener("keyup", (event) => {
 function insertString(node: Node, offset: number, str: string): void {
   node.textContent =
     node.textContent?.substring(0, offset) +
-    "}" +
+    str +
     node.textContent?.substring(offset!);
 }
 
@@ -54,6 +54,7 @@ function onKeyUp(event: KeyboardEvent): void {
   ) {
     console.log("found it");
     insertString(node, offset, "in{} \end{}")
+    selection.setPosition(node, offset+2);
   }
 
   // TODO replace the environment name if the contents of \begin{*} and \end{*} change
