@@ -54,30 +54,32 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
-  // replace env name for \begin{} \end{}
-  // shortcut will be
-  // \begin{
-  // or
-  // \end{
-  // and having both \begin{} and \end{} in the node
-
-  // act if one has been changed to replace env name
+  // replace latex env name for \begin{**} -> \end{**}
   if (
-    node.textContent?.match("\\begin{([a-z]+)}") ||
-    node.textContent?.match("\\end{([a-z]+)}")
+    node.textContent?.match("/\\begin{([a-z]+)}/i")
+    // TODO check that the next character after the caret is } ??
   ) {
     // find the begin just before the caret position
-    const idx = node.textContent?.substring(0, offset).lastIndexOf("\\begin");
-    // use regex to replace the last \end{*}
-    // with envName from \begin{*}
-    const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
-    // analyze from after the \begin before the caret
+    const idx = node.textContent?.lastIndexOf("\\begin", offset);
     const text = node.textContent?.slice(idx);
-    // replace 2nd group with first group
-    const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
-    node.textContent = node.textContent.substring(0, idx) + newText;
+
+    // if \end{} is empty just fill it with \begin{*}
+    const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
+    if (text.match(re1)) {
+      // use first group match to fill out the end tag
+      const newText = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
+      node.textContent = node.textContent.substring(0, idx) + newText;
+    } else {
+      // use regex to replace the \end{*} with envName from \begin{*}
+      const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
+      // replace 3rd group with first group
+      const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
+      node.textContent = node.textContent.substring(0, idx) + newText;
+      // TODO check what happens when there's multiple (?)
+    }
     // move the caret back
     selection.setPosition(node, offset);
+    // TODO return here?
   }
 
   // TODO replace the environment name if the contents of \begin{*} and \end{*} change
