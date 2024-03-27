@@ -16,7 +16,7 @@ function insertString(node: Node, offset: number, str: string): void {
 
 function onKeyUp(event: KeyboardEvent): void {
   // only act on standard keys
-  if (event.key.length > 1 || event.key === "Backspace") {
+  if (event.key.length > 1 && event.key !== "Backspace") {
     return;
   }
 
