@@ -30,31 +30,10 @@ export const shortcuts = {
       // with envName from \begin{*}
       const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
       // replace 2nd group with first group
-      const str = "\\begin{first} stuff in the middle \\end{second}"
-      const newstr = str.replace(re, "\\begin{$3}$2\\end{$1}");
-      console.log(newstr)
-
-
-
-      // const text = node.textContent?.slice(idx)
-      // const regex = /\{([a-z]*)\}/i; // case insensitive
-      // const found = text?.match(regex);
-      // if (found && found[1]) {
-      //   const envName = found[1];
-      //   // replace the \end{*} in text content with the envName
-      //   text?.replace()
-      //   const regex = /\\end\{(.*)\}/i;
-      //   console.log(paragraph.replace(regex, 'ferret'));
-      //   // append the replaced text
-      // }
-      // replace the last index of \end{*}
-      // replace with \end{envName}
-      // try making it a modular operation
-      
-
+      const text = node.textContent?.slice(idx);
+      const newText = text?.replace(re, "\\begin{$3}$2\\end{$1}");
+      node.textContent = newText ? node.textContent?.substring(0, idx) + newText : node.textContent;
     }
-    // TODO get the environment name (maybe use STDIN(??))
-    //return "\\begin{} \\end{}";
   },
   // FIXME use regex?
   "{": (node: Node) => {
@@ -65,6 +44,14 @@ export const shortcuts = {
     setTimeout(() => {
       window.getSelection()?.modify("move", "right", "character");
     }, 10);
+
+    // TODO allow typing another right bracket
+    // FIXME more elegant solution than while loop
+    // FIXME have a tracking of state, what was the last shortcut
+    // while()
+    // if you get another }, ignore it 
+    // note we only want to do this after we just inserted a }
+    return "}"
 
     // TOOO modularize the movement of the cursor
   },

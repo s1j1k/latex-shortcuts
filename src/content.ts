@@ -7,6 +7,10 @@ document.addEventListener("keyup", (event) => {
 
 // FIXME should we do with by checking inner HTML itself(?)
 
+// allow the last inserted to be typed again
+// TODO checking that it's also the same node (state tracking of last node)
+let lastInserted: string | undefined; 
+
 function onKeyUp(event: KeyboardEvent): void {
   // only act on space
   // const keyName = event.key;
@@ -19,6 +23,24 @@ function onKeyUp(event: KeyboardEvent): void {
   const text = window.getSelection()?.anchorNode?.textContent ?? "";
   if (text === "") {
     return;
+  }
+
+  // if we type a single key we just inserted, delete it
+  // TODO allow re typing the whole word (type over with no effect)
+  if (lastInserted && lastInserted.length === 1 && event.key === lastInserted) {
+    let node = window.getSelection()?.anchorNode;
+    let idx = text.lastIndexOf(lastInserted);
+    if (idx === -1) {
+      node = window.getSelection()?.anchorNode?.previousSibling;
+      idx = node?.textContent?.lastIndexOf(lastInserted) ?? -1;
+    }
+
+    // allow } to be typed again after it gets inserted
+    const re = RegExp(lastInserted+"(.*)")
+    node!.textContent = node?.textContent?.replace(re, lastInserted) ?? String(node?.textContent);
+
+    lastInserted = undefined;
+
   }
 
   for (const [key, value] of Object.entries(shortcuts)) {
@@ -45,7 +67,7 @@ function onKeyUp(event: KeyboardEvent): void {
       console.log(node)
     try {
       // @ts-ignore
-      value(node);
+      lastInserted = value(node);
       // apply one shortcut at a time
       break;
       //window.getSelection().anchorNode.textContent = text.replace(key, value());
