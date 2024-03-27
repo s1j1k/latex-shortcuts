@@ -7,9 +7,28 @@ document.addEventListener("keyup", (event) => {
   }
 });
 
+function insertString(node: Node, offset: number, str: string): void {
+  node.textContent =
+    node.textContent?.substring(0, offset) +
+    "}" +
+    node.textContent?.substring(offset!);
+}
+
 function onKeyUp(event: KeyboardEvent): void {
   // only act on standard keys
   if (event.key.length > 1) {
+    return;
+  }
+
+  const selection = window.getSelection();
+  if (!selection) {
+    return
+  }
+
+  const offset = selection.focusOffset;
+  const node = selection.focusNode;
+
+  if (node === undefined || node === null || (!offset && offset !== 0)) {
     return;
   }
 
@@ -17,24 +36,26 @@ function onKeyUp(event: KeyboardEvent): void {
   // allow nested
   // allow to type over
   if (event.key === "{") {
-    // insert }
-    // TODO Just handle simpel case (add parent node later for inline math func)
-    // try to dispatch keyboard event?
-
-    // TODO check if the text content includes {, or switch the focus to the parent (?)
-
-    // just find the offset
-    const offset = window.getSelection()?.focusOffset;
-    // insert at that offset
-    const node = window.getSelection()?.focusNode;
-    // FIXME more elegant than substring?
-    node!.textContent =
-      node?.textContent?.substring(0, offset) +
-      "}" +
-      node?.textContent?.substring(offset!);
-
+    insertString(node, offset, "}");
     // note the caret resets to the start of the node when we set the text content
     // move the caret over
-    window.getSelection()?.setPosition(node!, offset!);
+    selection.setPosition(node, offset);
   }
+
+  // TODO modularize
+  // look for shortcut \beg
+  const shortcut = "\\beg";
+  console.log(
+    "looking for \\beg in substring: ",
+    node.textContent?.substring(offset - shortcut.length, offset)
+  );
+  if (
+    node.textContent?.substring(offset - shortcut.length, offset) === shortcut
+  ) {
+    console.log("found it");
+    insertString(node, offset, "in{} \end{}")
+  }
+
+  // TODO replace the environment name if the contents of \begin{*} and \end{*} change
+  // TODO modularize that 
 }
