@@ -56,7 +56,7 @@ function onKeyUp(event: KeyboardEvent): void {
 
   // replace latex env name for \begin{**} -> \end{**}
   if (
-    node.textContent?.match("/\\begin{([a-z]+)}/i")
+    node.textContent?.slice(0,offset).match(/\\begin{[a-z]+$/i)
     // TODO check that the next character after the caret is } ??
   ) {
     // find the begin just before the caret position
