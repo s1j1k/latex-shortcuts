@@ -67,7 +67,7 @@ function onKeyUp(event: KeyboardEvent): void {
     node.textContent?.match("\\end{([a-z]+)}")
   ) {
     // find the begin just before the caret position
-    const idx = node.textContent?.substring(0,offset).lastIndexOf("\\begin");
+    const idx = node.textContent?.substring(0, offset).lastIndexOf("\\begin");
     // use regex to replace the last \end{*}
     // with envName from \begin{*}
     const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
@@ -75,11 +75,10 @@ function onKeyUp(event: KeyboardEvent): void {
     const text = node.textContent?.slice(idx);
     // replace 2nd group with first group
     const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
-    node.textContent = node.textContent.substring(0,idx) + newText;
+    node.textContent = node.textContent.substring(0, idx) + newText;
     // move the caret back
     selection.setPosition(node, offset);
-  }        
-     
+  }
 
   // TODO replace the environment name if the contents of \begin{*} and \end{*} change
   // TODO modularize that
