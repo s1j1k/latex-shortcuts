@@ -29,33 +29,34 @@ function findNodeWithString(searchString: string): {
   return { node: node, idx: idx };
 }
 
-function onKeyUp(event: KeyboardEvent): void {
-  // only act on space
-  // const keyName = event.key;
-  // if (keyName != " ") {
-  //   return;
-  // }
-  // TODO confirm we are in a latex block
+/**
+ * Helper function to move the caret position right by n spaces
+ * @param n 
+ */
+function shiftCaretRight(n: number): void {
+  for (let i = 0; i < n; i++) {
+    window.getSelection()?.modify("move", "right", "character");
+  }
+}
 
-  // analyse the text content
-  const text = window.getSelection()?.anchorNode?.textContent ?? "";
-  if (text === "") {
+function onKeyUp(event: KeyboardEvent): void {
+  // only act on standard keys
+  if (event.key.length > 1) {
     return;
   }
 
-  // if we type a single key we just inserted, delete it
+  // analyse the text content
+
+  // if we type a single key we just inserted, delete it and move the caret forward
   // TODO allow re typing the whole word (type over with no effect)
   if (lastInserted && lastInserted.length === 1 && event.key === lastInserted) {
     const { node, idx } = findNodeWithString(lastInserted);
     if (node) {
       // allow } to be typed again after it gets inserted
-      const re = RegExp(lastInserted + "(.*)");
-      node.textContent =
-        node.textContent?.replace(re, lastInserted) ?? String(node.textContent);
-      // TODO move the caret two points to the right
-      for (let i = 0; i < 2; i++) {
-        window.getSelection()?.modify("move", "right", "character");
-      }
+      const re = RegExp(lastInserted + lastInserted);
+      node.textContent = node.textContent?.replace(re, lastInserted) ?? String(node.textContent);
+      // TODO move the caret two points to the right 
+      shiftCaretRight(2);
       // FIXME more elegant solution
       lastInserted = undefined;
       return;
@@ -71,9 +72,6 @@ function onKeyUp(event: KeyboardEvent): void {
       }
       // TODO check if we are currently typing inside brackets before proceeding 
       // TODO check the current caret position
-      const anchorOffset = 
-      if (node.textContent?.slice(idx).startsWith("\\begin{") || 
-      node.textContent.anchorOffset
 
       // find what is in the begin environment
       const idx = node.textContent?.lastIndexOf("\\begin");
@@ -88,8 +86,7 @@ function onKeyUp(event: KeyboardEvent): void {
         : node.textContent;
     }
     
-    // FIXME restrict further where this acts
-    // \begin{} \end{t}
+    // FIXME restrict further where this acts as needed
     return; // don't proceed further 
   }
 
