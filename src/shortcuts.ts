@@ -26,13 +26,14 @@ export const shortcuts = {
     // TODO get the environment name (maybe use STDIN(??))
     //return "\\begin{} \\end{}";
   },
+  // FIXME use regex?
   "{": (node: Node) => {
     if (node.textContent?.indexOf("}") !== -1) {
       console.log("Found a closing bracket, leaving!")
       return;
     }
     // add a closing bracket
-    node.textContent = node.textContent.replace("}","{}")
+    node.textContent = node.textContent.replace("{","{}");
     // move the cursor back one (needed ?)
     window.getSelection()?.modify("move", "right", "character");
     // TOOO modularize the movement of the cursor

@@ -21,24 +21,28 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
-  let node = window.getSelection()?.anchorNode;
   for (const [key, value] of Object.entries(shortcuts)) {
+    let node = window.getSelection()?.anchorNode;
     let idx = text.lastIndexOf(key);
 
     //const node = window.getSelection()?.anchorNode;
 
     if (idx === -1) {
       // try the previous sibling
+      console.log("Not found in selected anchor node, check previous sibling")
       node = window.getSelection()?.anchorNode?.previousSibling;
       idx = node?.textContent?.lastIndexOf(key) ?? -1;
       if (idx === -1) {
-        console.log("Shortcut ", key, " not detected.");
+        continue;
       }
     }
-    // TODO make sure it is the very last thing in the element
-    if (idx !== -1)
+
+    // make sure the shortcut is the very last part of the text content
+    if (node?.textContent?.slice(idx) === key)
       // FIXME delete
       console.log("Shortcut ", key, " detected in buffer!");
+      console.log(node?.textContent)
+      console.log(node)
     try {
       // @ts-ignore
       value(node);
