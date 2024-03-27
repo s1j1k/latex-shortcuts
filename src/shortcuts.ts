@@ -23,17 +23,8 @@ export const shortcuts = {
       window.getSelection()?.modify("move", "right", "character");
     }
 
-    while (node.textContent?.indexOf("\\begin") !== -1) {
-      // find what is in the begin environment
-      const idx = node.textContent?.lastIndexOf("\\begin")
-      // use regex to replace the last \end{*}
-      // with envName from \begin{*}
-      const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
-      // replace 2nd group with first group
-      const text = node.textContent?.slice(idx);
-      const newText = text?.replace(re, "\\begin{$3}$2\\end{$1}");
-      node.textContent = newText ? node.textContent?.substring(0, idx) + newText : node.textContent;
-    }
+
+    return "\\begin";
   },
   // FIXME use regex?
   "{": (node: Node) => {
@@ -51,7 +42,7 @@ export const shortcuts = {
     // while()
     // if you get another }, ignore it 
     // note we only want to do this after we just inserted a }
-    return "}"
+    return "}";
 
     // TOOO modularize the movement of the cursor
   },
