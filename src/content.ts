@@ -46,6 +46,8 @@ function onKeyUp(event: KeyboardEvent): void {
     try {
       // @ts-ignore
       value(node);
+      // apply one shortcut at a time
+      break;
       //window.getSelection().anchorNode.textContent = text.replace(key, value());
     } catch {}
   }
