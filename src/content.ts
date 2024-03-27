@@ -31,7 +31,7 @@ function findNodeWithString(searchString: string): {
 
 /**
  * Helper function to move the caret position right by n spaces
- * @param n 
+ * @param n
  */
 function shiftCaretRight(n: number): void {
   for (let i = 0; i < n; i++) {
@@ -45,20 +45,37 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
+  // for a single symbol
+  // check the last inserted only once, then clear it 
+  // (you only get one chance to type over top of it)
+  const currentLastInserted = lastInserted;
+  if (lastInserted && lastInserted.length === 1) {
+    lastInserted = undefined;
+  }
+
   // analyse the text content
 
   // if we type a single key we just inserted, delete it and move the caret forward
   // TODO allow re typing the whole word (type over with no effect)
-  if (lastInserted && lastInserted.length === 1 && event.key === lastInserted) {
-    const { node, idx } = findNodeWithString(lastInserted);
+
+  // allow typing the just inserted symbol 2 times
+  if (currentLastInserted && currentLastInserted.length === 1 && event.key === currentLastInserted) {
+    const { node, idx } = findNodeWithString(currentLastInserted);
     if (node) {
-      // allow } to be typed again after it gets inserted
-      const re = RegExp(lastInserted + lastInserted);
-      node.textContent = node.textContent?.replace(re, lastInserted) ?? String(node.textContent);
-      // TODO move the caret two points to the right 
-      shiftCaretRight(2);
+      console.log(
+        "Remove any additional entry for last inserted shortcut: ",
+        lastInserted
+      );
+      // make sure it's the very last thing entered
+      node?.textContent?.slice(idx) === currentLastInserted + currentLastInserted;
+      // change to just one entry
+      node.textContent = node.textContent?.substring(0, idx) + currentLastInserted;
+      // TODO move the caret two points to the right (or more?)
+      //shiftCaretRight(2);
+      shiftCaretRight(node.textContent.length);
       // FIXME more elegant solution
-      lastInserted = undefined;
+      // don't track this symbol again
+      // lastInserted = undefined;
       return;
     }
   }
@@ -66,28 +83,31 @@ function onKeyUp(event: KeyboardEvent): void {
   if (lastInserted === "\\begin") {
     const { node, idx } = findNodeWithString(lastInserted);
     if (node) {
-      // don't act if there's no change to the begin/end 
-      if (node.textContent?.includes("\\begin{}") && node.textContent.includes("\\end{}")) {
-        return;
+      // act if one has been changed
+      if (
+        node.textContent?.match("\\begin{([a-z]+)}") ||
+        node.textContent?.match("\\end{([a-z]+)}")
+      ) {
+        // find what is in the begin environment
+        const idx = node.textContent?.lastIndexOf("\\begin");
+        // use regex to replace the last \end{*}
+        // with envName from \begin{*}
+        const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
+        // replace 2nd group with first group
+        const text = node.textContent?.slice(idx);
+        const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
+        node.textContent = newText
+          ? node.textContent?.substring(0, idx) + newText
+          : node.textContent;
+        // TODO move caret to where it was
+        shiftCaretRight(node.textContent?.length ?? 0);
       }
-      // TODO check if we are currently typing inside brackets before proceeding 
-      // TODO check the current caret position
 
-      // find what is in the begin environment
-      const idx = node.textContent?.lastIndexOf("\\begin");
-      // use regex to replace the last \end{*}
-      // with envName from \begin{*}
-      const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
-      // replace 2nd group with first group
-      const text = node.textContent?.slice(idx);
-      const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
-      node.textContent = newText
-        ? node.textContent?.substring(0, idx) + newText
-        : node.textContent;
+      // FIXME restrict further where this acts as needed
+      return; // don't proceed further
     }
-    
-    // FIXME restrict further where this acts as needed
-    return; // don't proceed further 
+    // TODO check if we are currently typing inside brackets before proceeding
+    // TODO check the current caret position
   }
 
   for (const [key, value] of Object.entries(shortcuts)) {
