@@ -75,7 +75,9 @@ function onKeyUp(event: KeyboardEvent): void {
     const text = node.textContent?.slice(idx);
     // replace 2nd group with first group
     const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
-    node.textContent = node.textContent.substring(0,idx) + newText
+    node.textContent = node.textContent.substring(0,idx) + newText;
+    // move the caret back
+    selection.setPosition(node, offset);
   }        
      
 
