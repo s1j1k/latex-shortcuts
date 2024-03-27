@@ -54,7 +54,7 @@ function onKeyUp(event: KeyboardEvent): void {
   ) {
     console.log("found it");
     insertString(node, offset, "in{} \end{}")
-    selection.setPosition(node, offset+2);
+    selection.setPosition(node, offset+3);
   }
 
   // TODO replace the environment name if the contents of \begin{*} and \end{*} change
