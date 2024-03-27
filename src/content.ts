@@ -9,10 +9,11 @@ document.addEventListener("keyup", (event) => {
 
 function onKeyUp(event: KeyboardEvent): void {
   // only act on space
-  const keyName = event.key;
-  if (keyName != " ") {
-    return;
-  }
+  // const keyName = event.key;
+  // if (keyName != " ") {
+  //   return;
+  // }
+  // TODO confirm we are in a latex block
 
   // analyse the text content
   const text = window.getSelection()?.anchorNode?.textContent ?? "";

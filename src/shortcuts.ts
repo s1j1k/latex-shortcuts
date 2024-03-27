@@ -22,4 +22,11 @@ export const shortcuts = {
     // TODO get the environment name (maybe use STDIN(??))
     //return "\\begin{} \\end{}";
   },
+  "{": (node: Node) => {
+    // add a closing bracket
+    node.textContent = node.textContent + "}";
+    // move the cursor back one (needed ?)
+    window.getSelection()?.modify("move", "right", "character");
+    // TOOO modularize the movement of the cursor
+  }
 };
