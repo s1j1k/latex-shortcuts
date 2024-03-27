@@ -22,7 +22,7 @@ function onKeyUp(event: KeyboardEvent): void {
 
   const selection = window.getSelection();
   if (!selection) {
-    return
+    return;
   }
 
   const offset = selection.focusOffset;
@@ -40,23 +40,45 @@ function onKeyUp(event: KeyboardEvent): void {
     // note the caret resets to the start of the node when we set the text content
     // move the caret over
     selection.setPosition(node, offset);
+    return;
   }
 
   // TODO modularize
   // look for shortcut \beg
   const shortcut = "\\beg";
-  console.log(
-    "looking for \\beg in substring: ",
-    node.textContent?.substring(offset - shortcut.length, offset)
-  );
   if (
     node.textContent?.substring(offset - shortcut.length, offset) === shortcut
   ) {
-    console.log("found it");
-    insertString(node, offset, "in{} \end{}")
-    selection.setPosition(node, offset+3);
+    insertString(node, offset, "in{} \\end{}");
+    selection.setPosition(node, offset + 3);
+    return;
   }
 
+  // replace env name for \begin{} \end{}
+  // shortcut will be
+  // \begin{
+  // or
+  // \end{
+  // and having both \begin{} and \end{} in the node
+
+  // act if one has been changed to replace env name
+  if (
+    node.textContent?.match("\\begin{([a-z]+)}") ||
+    node.textContent?.match("\\end{([a-z]+)}")
+  ) {
+    // find the begin just before the caret position
+    const idx = node.textContent?.substring(0,offset).lastIndexOf("\\begin");
+    // use regex to replace the last \end{*}
+    // with envName from \begin{*}
+    const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
+    // analyze from after the \begin before the caret
+    const text = node.textContent?.slice(idx);
+    // replace 2nd group with first group
+    const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
+    node.textContent = node.textContent.substring(0,idx) + newText
+  }        
+     
+
   // TODO replace the environment name if the contents of \begin{*} and \end{*} change
-  // TODO modularize that 
+  // TODO modularize that
 }
