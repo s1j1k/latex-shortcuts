@@ -23,7 +23,7 @@ function findNodeWithString(searchString: string): {
   let node = window.getSelection()?.anchorNode;
   let idx = node?.textContent?.lastIndexOf(searchString) ?? -1;
   if (idx === -1) {
-    node = window.getSelection()?.anchorNode?.previousSibling;
+    node = window.getSelection()?.anchorNode?.parentNode;
     idx = node?.textContent?.lastIndexOf(searchString) ?? -1;
   }
   return { node: node, idx: idx };
@@ -52,15 +52,29 @@ function onKeyUp(event: KeyboardEvent): void {
       const re = RegExp(lastInserted + "(.*)");
       node.textContent =
         node.textContent?.replace(re, lastInserted) ?? String(node.textContent);
-
+      // TODO move the caret two points to the right
+      for (let i = 0; i < 2; i++) {
+        window.getSelection()?.modify("move", "right", "character");
+      }
+      // FIXME more elegant solution
       lastInserted = undefined;
       return;
     }
   }
 
   if (lastInserted === "\\begin") {
-    const { node } = findNodeWithString(lastInserted);
+    const { node, idx } = findNodeWithString(lastInserted);
     if (node) {
+      // don't act if there's no change to the begin/end 
+      if (node.textContent?.includes("\\begin{}") && node.textContent.includes("\\end{}")) {
+        return;
+      }
+      // TODO check if we are currently typing inside brackets before proceeding 
+      // TODO check the current caret position
+      const anchorOffset = 
+      if (node.textContent?.slice(idx).startsWith("\\begin{") || 
+      node.textContent.anchorOffset
+
       // find what is in the begin environment
       const idx = node.textContent?.lastIndexOf("\\begin");
       // use regex to replace the last \end{*}
@@ -68,11 +82,15 @@ function onKeyUp(event: KeyboardEvent): void {
       const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
       // replace 2nd group with first group
       const text = node.textContent?.slice(idx);
-      const newText = text?.replace(re, "\\begin{$3}$2\\end{$1}");
+      const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
       node.textContent = newText
         ? node.textContent?.substring(0, idx) + newText
         : node.textContent;
     }
+    
+    // FIXME restrict further where this acts
+    // \begin{} \end{t}
+    return; // don't proceed further 
   }
 
   for (const [key, value] of Object.entries(shortcuts)) {
