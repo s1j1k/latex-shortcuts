@@ -77,9 +77,9 @@ function onKeyUp(event: KeyboardEvent): void {
     const text = editingNode?.textContent;
 
     const getEndNode = () => {
-      const childNodes = [...editingNode?.childNodes!];
+      const childNodes = [...editingNode!.childNodes!];
       // @ts-ignore
-      const idx = [childNodes].indexOf(node);
+      const idx = childNodes.indexOf(node.parentNode);
       // @ts-ignore
       return childNodes.slice(idx + 1).find((childNode) => {childNode.className === "token keyword"})
     }
