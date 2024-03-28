@@ -37,6 +37,8 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
+  // FIXME caret position in the block equation when first opening is not working
+
   /**
    * if we insert a "{", insert a subsequent "}" -> done
    * allow nested -> done
@@ -48,7 +50,7 @@ function onKeyUp(event: KeyboardEvent): void {
     // move the caret over
     selection.setPosition(node, offset);
     return;
-    // TODO allow to type over
+    // TODO allow to type over - handle block eq as well
   }
 
   // look for shortcut \beg
@@ -70,24 +72,55 @@ function onKeyUp(event: KeyboardEvent): void {
     node.textContent?.slice(0, offset).match(/\\begin{[a-z]*$/i) ||
     inBlockEqKeyword
   ) {
+    
     const editingNode = inBlockEqKeyword ? node.parentNode?.parentNode : node;
     const text = editingNode?.textContent;
+
+    const getEndNode = () => {
+      const childNodes = [...editingNode?.childNodes!];
+      // @ts-ignore
+      const idx = [childNodes].indexOf(node);
+      // @ts-ignore
+      return childNodes.slice(idx + 1).find((childNode) => {childNode.className === "token keyword"})
+    }
+    const endNode = inBlockEqKeyword ? getEndNode() : undefined;
+    const envName = inBlockEqKeyword ? node.textContent! : undefined;
+
 
     if (text && editingNode) {
       if (text.match(re1)) {
         // \begin{**} \end{} -> fill up \end{}
-        editingNode.textContent = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
+        // FIXME for block equation find the nearest "token keyword" and replace it there
+        // don't edit the parent node directly to preserve caret position logic 
+        if (inBlockEqKeyword) {
+          // FIXME does this work?
+          endNode!.textContent = envName!;
+        } else {
+          editingNode.textContent = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
+        }
       } else if (text.match(re2)) {
         // \begin{**} \end{**} -> make \end{} match
+        if (inBlockEqKeyword) {
+          endNode!.textContent = envName!;
+        } else {
         editingNode.textContent = text?.replace(re2, "\\begin{$1}$2\\end{$1}");
+        }
       } else if (text.match(re3)) {
         // \begin{} \end{**} -> empty the end tag fully
+        // FIXME does this work
+        if (inBlockEqKeyword) {
+          endNode!.textContent = envName!;
+        } else {
         editingNode.textContent = text?.replace(re2, "\\begin{}$2\\end{}");
+        }
       }
     }
-
+    // FIXME caret position in block equation is wrong 
     // move the caret position back
+    // note for block equation original node has been deleted, use node & offset 
+    // to find a search string & move the caret there
     selection.setPosition(node, offset);
+
     return;
   }
 }
