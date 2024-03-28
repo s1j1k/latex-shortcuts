@@ -1,3 +1,8 @@
+// helpers for \begin{**} \end{**} shortcut
+const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
+const re2 = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
+const re3 = /\\begin{}(.*)\\end{([a-z]*)}/i;
+
 // check for shortcut pattern after any key is released
 document.addEventListener("keyup", (event) => {
   try {
@@ -26,24 +31,26 @@ function onKeyUp(event: KeyboardEvent): void {
   }
 
   const offset = selection.focusOffset;
-  let node = selection.focusNode;
+  const node = selection.focusNode;
 
   if (node === undefined || node === null || (!offset && offset !== 0)) {
     return;
   }
 
-  // if we insert a "{", insert a subsequent "}"
-  // allow nested
-  // allow to type over
+  /**
+   * if we insert a "{", insert a subsequent "}" -> done
+   * allow nested -> done
+   * allow to type over -> pending
+   */
   if (event.key === "{") {
     insertString(node, offset, "}");
     // note the caret resets to the start of the node when we set the text content
     // move the caret over
     selection.setPosition(node, offset);
     return;
+    // TODO allow to type over
   }
 
-  // TODO modularize
   // look for shortcut \beg
   const shortcut = "\\beg";
   if (
@@ -55,69 +62,32 @@ function onKeyUp(event: KeyboardEvent): void {
     return;
   }
 
+  // check if inside a Notion block equation \begin{**} or \end{**}
+  const inBlockEqKeyword = node.parentElement?.className === "token keyword";
+
   // replace latex env name for \begin{**} -> \end{**}
   if (
-    node.textContent?.slice(0, offset).match(/\\begin{[a-z]*$/i)
-    // TODO check that the next character after the caret is } ??
+    node.textContent?.slice(0, offset).match(/\\begin{[a-z]*$/i) ||
+    inBlockEqKeyword
   ) {
-    // find the begin just before the caret position
-    const idx = node.textContent?.lastIndexOf("\\begin", offset);
-    const text = node.textContent?.slice(idx)!;
+    const editingNode = inBlockEqKeyword ? node.parentNode?.parentNode : node;
+    const text = editingNode?.textContent;
 
-    // if \end{} is empty just fill it with \begin{*}
-    const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
-    const re2 = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
-    const re3 = /\\begin{}(.*)\\end{([a-z]*)}/i;
-    if (text.match(re1)) {
-      // \begin{**} \end{} -> fill up \end{}
-      const newText = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
-      node.textContent = node.textContent!.substring(0, idx) + newText;
-    } else if (text.match(re2)) {
-      // \begin{**} \end{**} -> make \end{} match
-      const newText = text?.replace(re2, "\\begin{$1}$2\\end{$1}");
-      node.textContent = node.textContent!.substring(0, idx) + newText;
+    if (text && editingNode) {
+      if (text.match(re1)) {
+        // \begin{**} \end{} -> fill up \end{}
+        editingNode.textContent = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
+      } else if (text.match(re2)) {
+        // \begin{**} \end{**} -> make \end{} match
+        editingNode.textContent = text?.replace(re2, "\\begin{$1}$2\\end{$1}");
+      } else if (text.match(re3)) {
+        // \begin{} \end{**} -> empty the end tag fully
+        editingNode.textContent = text?.replace(re2, "\\begin{}$2\\end{}");
+      }
     }
-     else if (text.match(re3)) {
-      // \begin{} \end{**} -> empty the end tag fully
-      const newText = text?.replace(re2, "\\begin{}$2\\end{}");
-      node.textContent = node.textContent!.substring(0, idx) + newText;
-     } 
 
-
-    // move the caret back
+    // move the caret position back
     selection.setPosition(node, offset);
-    // TODO return here?
+    return;
   }
-
-  // \beg{**} -> \end{**} for inside block equations
-  // handling for inside block equations
-  if (node.parentElement?.className === "token keyword") {
-    // save the text content to try to find the offset
-    const parentNode = node.parentNode?.parentNode!;
-    if (!parentNode) {
-      return;
-    }
-
-    // TOOD get the class name directly
-    // TODO handle completely separtely
-    // just fill out the next \end (progressively search or use regex in the parent node (?)
-
-    // if \end{} is empty just fill it with \begin{*}
-    const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
-    const text = parentNode.textContent!;
-    if (text.match(re1)) {
-      // use first group match to fill out the end tag
-      parentNode.textContent = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
-    } else {
-      // use regex to replace the \end{*} with envName from \begin{*}
-      const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
-      // replace 3rd group with first group
-      parentNode.textContent = text?.replace(re, "\\begin{$1}$2\\end{$1}");
-    }
-    // move the caret back
-    selection.setPosition(node, offset);
-  }
-
-  // TODO replace the environment name if the contents of \begin{*} and \end{*} change
-  // TODO modularize that
 }
