@@ -57,7 +57,7 @@ function onKeyUp(event: KeyboardEvent): void {
 
   // replace latex env name for \begin{**} -> \end{**}
   if (
-    node.textContent?.slice(0, offset).match(/\\begin{[a-z]+$/i)
+    node.textContent?.slice(0, offset).match(/\\begin{[a-z]*$/i)
     // TODO check that the next character after the caret is } ??
   ) {
     // find the begin just before the caret position
@@ -66,18 +66,24 @@ function onKeyUp(event: KeyboardEvent): void {
 
     // if \end{} is empty just fill it with \begin{*}
     const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
+    const re2 = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
+    const re3 = /\\begin{}(.*)\\end{([a-z]*)}/i;
     if (text.match(re1)) {
-      // use first group match to fill out the end tag
+      // \begin{**} \end{} -> fill up \end{}
       const newText = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
       node.textContent = node.textContent!.substring(0, idx) + newText;
-    } else {
-      // use regex to replace the \end{*} with envName from \begin{*}
-      const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
-      // replace 3rd group with first group
-      const newText = text?.replace(re, "\\begin{$1}$2\\end{$1}");
+    } else if (text.match(re2)) {
+      // \begin{**} \end{**} -> make \end{} match
+      const newText = text?.replace(re2, "\\begin{$1}$2\\end{$1}");
       node.textContent = node.textContent!.substring(0, idx) + newText;
-      // TODO check what happens when there's multiple (?)
     }
+     else if (text.match(re3)) {
+      // \begin{} \end{**} -> empty the end tag fully
+      const newText = text?.replace(re2, "\\begin{}$2\\end{}");
+      node.textContent = node.textContent!.substring(0, idx) + newText;
+     } 
+
+
     // move the caret back
     selection.setPosition(node, offset);
     // TODO return here?
