@@ -57,19 +57,10 @@ function onKeyUp(event: KeyboardEvent): void {
 
   // replace latex env name for \begin{**} -> \end{**}
   if (
-    node.textContent?.slice(0,offset).match(/\\begin{[a-z]+$/i)
+    node.textContent?.slice(0, offset).match(/\\begin{[a-z]+$/i)
     // TODO check that the next character after the caret is } ??
   ) {
     // find the begin just before the caret position
-
-    // handling for inside block equations 
-    if (node.parentElement?.className.includes("token")) {
-      node = node.parentNode?.parentNode!;
-      if (!node ) {
-        return;
-      }
-    }
-
     const idx = node.textContent?.lastIndexOf("\\begin", offset);
     const text = node.textContent?.slice(idx)!;
 
@@ -90,6 +81,35 @@ function onKeyUp(event: KeyboardEvent): void {
     // move the caret back
     selection.setPosition(node, offset);
     // TODO return here?
+  }
+
+  // \beg{**} -> \end{**} for inside block equations
+  // handling for inside block equations
+  if (node.parentElement?.className === "token keyword") {
+    // save the text content to try to find the offset
+    const parentNode = node.parentNode?.parentNode!;
+    if (!parentNode) {
+      return;
+    }
+
+    // TOOD get the class name directly
+    // TODO handle completely separtely
+    // just fill out the next \end (progressively search or use regex in the parent node (?)
+
+    // if \end{} is empty just fill it with \begin{*}
+    const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
+    const text = parentNode.textContent!;
+    if (text.match(re1)) {
+      // use first group match to fill out the end tag
+      parentNode.textContent = text?.replace(re1, "\\begin{$1}$2\\end{$1}");
+    } else {
+      // use regex to replace the \end{*} with envName from \begin{*}
+      const re = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
+      // replace 3rd group with first group
+      parentNode.textContent = text?.replace(re, "\\begin{$1}$2\\end{$1}");
+    }
+    // move the caret back
+    selection.setPosition(node, offset);
   }
 
   // TODO replace the environment name if the contents of \begin{*} and \end{*} change
