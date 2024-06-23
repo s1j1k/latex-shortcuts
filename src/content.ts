@@ -19,6 +19,13 @@ document.addEventListener("keyup", (event) => {
   }
 });
 
+/**
+ * 
+ * Enable inserting a string directly after the cursor / typed key
+ * @param node 
+ * @param offset 
+ * @param str 
+ */
 function insertString(node: Node, offset: number, str: string): void {
   node.textContent =
     node.textContent?.substring(0, offset) +
@@ -26,8 +33,30 @@ function insertString(node: Node, offset: number, str: string): void {
     node.textContent?.substring(offset!);
 }
 
+/**
+ * 
+ * Enable deleting a string directly before the cursor / typed key
+ * @param node 
+ * @param offset 
+ * @param str 
+ */
+function deleteString(node: Node, offset: number, str: string): void {
+  const numChars = str.length;
+  if (node.textContent?.substring(offset-numChars,offset) === str) {
+    node.textContent =
+    node.textContent?.substring(0, offset-numChars) +
+    node.textContent?.substring(offset);
+  }
+}
+
+/**
+ * 
+ * Main function, event handler for when a key is pressed, apply the shortcuts
+ * @param event 
+ * @returns 
+ */
 function onKeyUp(event: KeyboardEvent): void {
-  // only act on standard keys
+  // only act on letters or Backspace
   if (event.key.length > 1 && event.key !== "Backspace") {
     return;
   }
@@ -56,6 +85,25 @@ function onKeyUp(event: KeyboardEvent): void {
     // note the caret resets to the start of the node when we set the text content
     // move the caret over
     selection.setPosition(node, offset);
+    return;
+    // TODO allow to type over - handle block eq as well
+  }
+
+  if (event.key === "{") {
+    insertString(node, offset, "}");
+    // note the caret resets to the start of the node when we set the text content
+    // move the caret over
+    selection.setPosition(node, offset);
+    return;
+    // TODO allow to type over - handle block eq as well
+  }
+
+  // TODO allow type over 1 } after autocompleting {}
+  if (event.key === "}") {
+    deleteString(node, offset, "}");
+    // note the caret resets to the start of the node when we set the text content
+    // move the caret over
+    selection.setPosition(node, offset-1);
     return;
     // TODO allow to type over - handle block eq as well
   }
