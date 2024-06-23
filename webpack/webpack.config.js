@@ -5,7 +5,6 @@ module.exports = {
    entry: {
       background: path.resolve(__dirname, "..", "src", "shortcuts.ts"),
    },
-   // FIXME why is the content.js not being named that ?
    output: {
       path: path.join(__dirname, "../dist"),
       filename: "[name].js",

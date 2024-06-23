@@ -1,14 +1,12 @@
+import {Token} from './types'
+import {insertString, deleteString} from './common'
+
+
 // helpers for \begin{**} \end{**} shortcut
 const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
 const re2 = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
 const re3 = /\\begin{}(.*)\\end{([a-z]*)}/i;
 
-// class names inside notion math block equation
-enum Token {
-  keyword = "token keyword",
-  functionSelector = "token function selector",
-  punctuation = "token punctuation",
-}
 
 // check for shortcut pattern after any key is released
 document.addEventListener("keydown", (event) => {
@@ -18,41 +16,6 @@ document.addEventListener("keydown", (event) => {
     // do nothing
   }
 });
-
-/**
- * 
- * Enable inserting a string directly after the cursor / typed key (after it is typed)
- * @param node 
- * @param offset 
- * @param str 
- */
-function insertString(node: Node, offset: number, str: string): void {
-  // Offset after the curren key is typed
-  const offsetKey = offset + 1;
-  node.textContent =
-    node.textContent?.substring(0, offsetKey) +
-    str +
-    node.textContent?.substring(offsetKey!);
-}
-
-/**
- * 
- * Enable deleting a string directly before the cursor / typed key
- * @param node 
- * @param offset 
- * @param str 
- */
-function deleteString(node: Node, offset: number, str: string): void {
-  const numChars = str.length;
-  // Offset after the key is typed
-  const keyOffset = offset + 1;
-  console.log("deleteString: ",node.textContent?.substring(offset-numChars,offset))
-  if (node.textContent?.substring(offset-numChars,offset) === str) {
-    node.textContent =
-    node.textContent?.substring(0, offset-numChars) +
-    node.textContent?.substring(offset);
-  }
-}
 
 /**
  * 
@@ -71,7 +34,8 @@ function onKeyDown(event: KeyboardEvent): void {
     return;
   }
 
-  const offset = selection.focusOffset;
+  // Consider the caret position after the current key is typed
+  const offset = selection.focusOffset + 1;
   const node = selection.focusNode;
 
   if (node === undefined || node === null || (!offset && offset !== 0)) {
@@ -79,7 +43,6 @@ function onKeyDown(event: KeyboardEvent): void {
   }
 
   // FIXME caret position in the block equation when first opening is not working
-
 
   // Autocomplete {}
   if (event.key === "{") {
