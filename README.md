@@ -7,15 +7,12 @@ To quote [Prof. Johnathan Manton](https://people.eng.unimelb.edu.au/jmanton/):
 Notion's flexible database structures help link ideas, but it lacks LaTeX auto-completion, which led to the creation of this project out of personal need.
 
 **Shortcuts implemented:**
-
+- Autocomplete `{}`, place cursor inside, allow typing `}` again once.
 
 - Begin and end a LateX environment easily:
     `\beg` expands to `\begin{} \end{}` (any Notion block), 
     places cursor inside `\begin{}`, and as you type the environment name
     copies content from `\begin{envname}` -> `\end{envname}` include deletion (editing envname in \end does nothing)
-- Auto complete `{}`:
-    `{` to `{}` and place cursor inside
-
     
 
 <!-- | Description                                      | Trigger | Result                                                                                  | Example                         | Notion Block       |

@@ -44,6 +44,8 @@ function insertString(node: Node, offset: number, str: string): void {
  */
 function deleteString(node: Node, offset: number, str: string): void {
   const numChars = str.length;
+  // Offset after the key is typed
+  const keyOffset = offset + 1;
   console.log("deleteString: ",node.textContent?.substring(offset-numChars,offset))
   if (node.textContent?.substring(offset-numChars,offset) === str) {
     node.textContent =
@@ -78,39 +80,19 @@ function onKeyDown(event: KeyboardEvent): void {
 
   // FIXME caret position in the block equation when first opening is not working
 
-  /**
-   * if we insert a "{", insert a subsequent "}" -> done
-   * allow nested -> done
-   * allow to type over -> pending
-   */
-  if (event.key === "{") {
-    // At this point the key is just being pressed
-    insertString(node, offset, "}");
-    // note the caret resets to the start of the node when we set the text content
-    // move the caret over (?)
-    selection.setPosition(node, offset);
-    return;
-    // TODO allow to type over - handle block eq as well
-  }
 
+  // Autocomplete {}
   if (event.key === "{") {
     insertString(node, offset, "}");
-    // note the caret resets to the start of the node when we set the text content
-    // move the caret over
     selection.setPosition(node, offset);
     return;
-    // TODO allow to type over - handle block eq as well
   }
 
-  // TODO allow type over } after autocompleting {}
+  // Allow typing } after autocompleting {}
   if (event.key === "}") {
-    // FIXME it still types the key for a second, move this to on keydown
-    deleteString(node, offset, "}");
-    // note the caret resets to the start of the node when we set the text content
-    // move the caret over
+    deleteString(node, offset+1, "}");
     selection.setPosition(node, offset);
     return;
-    // TODO allow to type over - handle block eq as well
   }
 
   // look for shortcut \beg
