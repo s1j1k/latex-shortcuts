@@ -35,7 +35,7 @@ function onKeyDown(event: KeyboardEvent): void {
   }
 
   // Consider the caret position after the current key is typed
-  const offset = selection.focusOffset + 1;
+  const offset = selection.focusOffset;
   const node = selection.focusNode;
 
   if (node === undefined || node === null || (!offset && offset !== 0)) {

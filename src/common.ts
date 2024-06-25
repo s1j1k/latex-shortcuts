@@ -7,7 +7,7 @@
  */
 export function insertString(node: Node, offset: number, str: string): void {
     // Offset after the curren key is typed
-    const offsetKey = offset + 1;
+    const offsetKey = offset;
     node.textContent =
       node.textContent?.substring(0, offsetKey) +
       str +
