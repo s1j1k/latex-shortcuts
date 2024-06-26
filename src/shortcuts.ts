@@ -46,25 +46,11 @@ function onKeyUp(event: KeyboardEvent): void {
   // Autocomplete {}
   if (event.key === "{") {
     // Cover notion math mode (inline and block equations)
-    // TODO insert a node directly after with the corret class when we are in math blocks
-    // NOTE same class as parent node
     if (
       node.textContent === "\n"
     ) {
       node.textContent = "}";
     }
-
-    else if (
-      node.parentElement?.className === Token.keyword
-    ) {
-      console.log("in math");
-      node.parentElement?.insertAdjacentText('beforeend',"}")
-    }
-
-    // else if (node.textContent === "\n") {
-    //     node.textContent = "}";
-    //     selection.setPosition(node, offset);
-    //  }
     else {
       insertString(node, offset + 1, "}");
       selection.setPosition(node, offset);
