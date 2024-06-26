@@ -1,29 +1,27 @@
-import {Token} from './types'
-import {insertString, deleteString} from './common'
-
+import { Token } from "./types";
+import { insertString, deleteString } from "./common";
 
 // helpers for \begin{**} \end{**} shortcut
 const re1 = /\\begin{([a-z]*)}(.*)\\end{}/i;
 const re2 = /\\begin{([a-z]*)}(.*)\\end{([a-z]*)}/i;
 const re3 = /\\begin{}(.*)\\end{([a-z]*)}/i;
 
-
 // check for shortcut pattern after any key is released
-document.addEventListener("keydown", (event) => {
+document.addEventListener("keyup", (event) => {
   try {
-    onKeyDown(event);
+    onKeyUp(event);
   } catch {
     // do nothing
   }
 });
 
 /**
- * 
+ *
  * Main function, event handler for when a key is pressed, apply the shortcuts
- * @param event 
- * @returns 
+ * @param event
+ * @returns
  */
-function onKeyDown(event: KeyboardEvent): void {
+function onKeyUp(event: KeyboardEvent): void {
   // only act on letters or Backspace
   if (event.key.length > 1 && event.key !== "Backspace") {
     return;
@@ -44,17 +42,41 @@ function onKeyDown(event: KeyboardEvent): void {
 
   // FIXME caret position in the block equation when first opening is not working
 
+  // FIXME why does this not work in inline math mode
   // Autocomplete {}
   if (event.key === "{") {
-    insertString(node, offset, "}");
-    selection.setPosition(node, offset);
+    // Cover notion math mode (inline and block equations)
+    // TODO insert a node directly after with the corret class when we are in math blocks
+    // NOTE same class as parent node
+    if (
+      node.textContent === "\n"
+    ) {
+      node.textContent = "}";
+    }
+
+    else if (
+      node.parentElement?.className === Token.keyword
+    ) {
+      console.log("in math");
+      node.parentElement?.insertAdjacentText('beforeend',"}")
+    }
+
+    // else if (node.textContent === "\n") {
+    //     node.textContent = "}";
+    //     selection.setPosition(node, offset);
+    //  }
+    else {
+      insertString(node, offset + 1, "}");
+      selection.setPosition(node, offset);
+    }
+
     return;
   }
 
   // Allow typing } after autocompleting {}
   if (event.key === "}") {
-    deleteString(node, offset+1, "}");
-    selection.setPosition(node, offset);
+    deleteString(node, offset + 1, "}");
+    selection.setPosition(node, offset + 1);
     return;
   }
 
@@ -89,7 +111,8 @@ function onKeyDown(event: KeyboardEvent): void {
       // make sure it's a begin
       // @ts-ignore
       const isBegin =
-        (childNodes[indexEnvName - 2] as Element).className === Token.functionSelector &&
+        (childNodes[indexEnvName - 2] as Element).className ===
+          Token.functionSelector &&
         childNodes[indexEnvName - 2].textContent === "\\begin";
 
       if (isBegin) {
